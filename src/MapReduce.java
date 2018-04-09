@@ -169,9 +169,8 @@ public class MapReduce {
 //                System.out.println("Approach 2");
 //                System.out.println(output);
 //        }
-	        
-	        
-        // APPROACH #3: Distributed MapReduce
+        
+     // APPROACH #3: Distributed MapReduce
         {
                 final Map<String, Map<String, Integer>> output = new HashMap<String, Map<String, Integer>>();
                 
@@ -186,7 +185,7 @@ public class MapReduce {
         }
                 };
                 
-                List<Future> mapFutures = new ArrayList<Future>(input.size()); 
+                List<Thread> mapCluster = new ArrayList<Thread>(input.size());
                 
                 Iterator<Map.Entry<String, String>> inputIter = input.entrySet().iterator();
                 while(inputIter.hasNext()) {
@@ -195,59 +194,39 @@ public class MapReduce {
                         final String contents = entry.getValue();
                         
                         Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                        	map(file, contents, mapCallback);
-                        	}
+                                @Override
+            public void run() {
+                                	map(file, contents, mapCallback);
+            }
                         });
-                        mapFutures.add(executor.submit(t));
-                        //mapCluster.add(t);
-                        //t.start();
+                        mapCluster.add(t);
+                        t.start();
                 }
                 
-                
                 // wait for mapping phase to be over:
-                for(Future current : mapFutures) {
-                    try {
-                    	// get method blocks until thread is finished
-                    	current.get();
-                    } catch(InterruptedException e) {
-                    	throw new RuntimeException(e);
-                    }
+                for(Thread t : mapCluster) {
+                        try {
+                                t.join();
+                        } catch(InterruptedException e) {
+                                throw new RuntimeException(e);
+                        }
                 }
                 
                 // GROUP:
                 
                 Map<String, List<String>> groupedItems = new HashMap<String, List<String>>();
-                List<Future> groupFutures = new ArrayList<Future>(); 
                 
                 Iterator<MappedItem> mappedIter = mappedItems.iterator();
                 while(mappedIter.hasNext()) {
                         MappedItem item = mappedIter.next();
                         String word = item.getWord();
                         String file = item.getFile();
-                        Thread t = new Thread(new Runnable() {
-                        	@Override
-                            public void run() {
-                        		List<String> list = groupedItems.get(word);
-                            	if (list == null) {
-                            		list = new LinkedList<String>();
-                                    groupedItems.put(word, list);
-                            	}
-                            list.add(file);
-                            }
-                        });
-                        groupFutures.add(executor.submit(t));
-                }
-                
-                // wait for grouping phase to be over:
-                for(Future current : groupFutures) {
-                	try {
-                		// get method blocks until thread is finished
-                		current.get();
-                	} catch(InterruptedException e) {
-                		throw new RuntimeException(e);
-                	}
+                        List<String> list = groupedItems.get(word);
+                        if (list == null) {
+                                list = new LinkedList<String>();
+                                groupedItems.put(word, list);
+                        }
+                        list.add(file);
                 }
                 
                 // REDUCE:
@@ -259,7 +238,7 @@ public class MapReduce {
         }
                 };
                 
-                List<Future> reduceFutures = new ArrayList<Future>(groupedItems.size());
+                List<Thread> reduceCluster = new ArrayList<Thread>(groupedItems.size());
                 
                 Iterator<Map.Entry<String, List<String>>> groupedIter = groupedItems.entrySet().iterator();
                 while(groupedIter.hasNext()) {
@@ -268,36 +247,33 @@ public class MapReduce {
                         final List<String> list = entry.getValue();
                         
                         Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                        	reduce(word, list, reduceCallback);
-                        	}
+                                @Override
+            public void run() {
+                                        reduce(word, list, reduceCallback);
+                                }
                         });
-                        reduceFutures.add(executor.submit(t));
-//                      reduceCluster.add(t);
-//                      t.start();
+                        reduceCluster.add(t);
+                        t.start();
                 }
-                
                 
                 // wait for reducing phase to be over:
-                for(Future current : reduceFutures) {
-                	try {
-                		// get method blocks until thread is finished
-                		current.get();
-                	} catch(InterruptedException e) {
-                		throw new RuntimeException(e);
-                	}
+                for(Thread t : reduceCluster) {
+                        try {
+                                t.join();
+                        } catch(InterruptedException e) {
+                                throw new RuntimeException(e);
+                        }
                 }
-                
                 long end = System.currentTimeMillis();
                 long time = end-start;
-                System.out.println("Approach 3 modified - uses thread pools");
+                System.out.println("Approach 3");
                 System.out.println("Time taken: "+time/1000.00+" secs");
                 //System.out.println(output);
                 System.out.println();
         }
-        
-     // APPROACH #4: Distributed MapReduce and parallel group phase
+	        
+	        
+        // APPROACH #3: Modified Distributed MapReduce
         {
                 final Map<String, Map<String, Integer>> output = new HashMap<String, Map<String, Integer>>();
                 
@@ -334,12 +310,12 @@ public class MapReduce {
                 
                 // wait for mapping phase to be over:
                 for(Future current : mapFutures) {
-                    try {
-                    	// get method blocks until thread is finished
-                    	current.get();
-                    } catch(InterruptedException e) {
-                    	throw new RuntimeException(e);
-                    }
+                	try {
+                		// get method blocks until thread is finished
+                		current.get();
+                	} catch(InterruptedException | ExecutionException e) {
+                		e.printStackTrace();
+                	}
                 }
                 
                 // GROUP:
@@ -393,8 +369,8 @@ public class MapReduce {
                 	try {
                 		// get method blocks until thread is finished
                 		current.get();
-                	} catch(InterruptedException e) {
-                		throw new RuntimeException(e);
+                	} catch(InterruptedException | ExecutionException e) {
+                		e.printStackTrace();
                 	}
                 }
                 long end = System.currentTimeMillis();
@@ -402,6 +378,131 @@ public class MapReduce {
                 System.out.println("Approach 4 Parallel Group phase");
                 System.out.println("Time taken: "+time/1000.00+" secs");
                 //System.out.println(output);
+        }
+        
+        // APPROACH #4: Distributed MapReduce and parallel group phase
+        {
+            final Map<String, Map<String, Integer>> output = new HashMap<String, Map<String, Integer>>();
+            
+            // MAP:
+            long start = System.currentTimeMillis();
+            final List<MappedItem> mappedItems = new LinkedList<MappedItem>();
+            
+            final MapCallback<String, MappedItem> mapCallback = new MapCallback<String, MappedItem>() {
+                    @Override
+    public synchronized void mapDone(String file, List<MappedItem> results) {
+        mappedItems.addAll(results);
+    }
+            };
+            
+            List<Future> mapFutures = new ArrayList<Future>(input.size()); 
+            
+            Iterator<Map.Entry<String, String>> inputIter = input.entrySet().iterator();
+            while(inputIter.hasNext()) {
+                    Map.Entry<String, String> entry = inputIter.next();
+                    final String file = entry.getKey();
+                    final String contents = entry.getValue();
+                    
+                    Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                    	map(file, contents, mapCallback);
+                    	}
+                    });
+                    mapFutures.add(executor.submit(t));
+                    //mapCluster.add(t);
+                    //t.start();
+            }
+            
+            
+            // wait for mapping phase to be over:
+            for(Future current : mapFutures) {
+                try {
+                	// get method blocks until thread is finished
+                	current.get();
+                } catch(InterruptedException e) {
+                	throw new RuntimeException(e);
+                }
+            }
+            
+            // GROUP:
+            
+            Map<String, List<String>> groupedItems = new HashMap<String, List<String>>();
+            List<Future> groupFutures = new ArrayList<Future>(); 
+            
+            Iterator<MappedItem> mappedIter = mappedItems.iterator();
+            while(mappedIter.hasNext()) {
+                    MappedItem item = mappedIter.next();
+                    String word = item.getWord();
+                    String file = item.getFile();
+                    Thread t = new Thread(new Runnable() {
+                    	@Override
+                        public void run() {
+                    		List<String> list = groupedItems.get(word);
+                        	if (list == null) {
+                        		list = new LinkedList<String>();
+                                groupedItems.put(word, list);
+                        	}
+                        list.add(file);
+                        }
+                    });
+                    groupFutures.add(executor.submit(t));
+            }
+            
+            // wait for grouping phase to be over:
+            for(Future current : groupFutures) {
+            	try {
+            		// get method blocks until thread is finished
+            		current.get();
+            	} catch(InterruptedException | ExecutionException e) {
+            		e.printStackTrace();
+            	}
+            }
+            
+            // REDUCE:
+            
+            final ReduceCallback<String, String, Integer> reduceCallback = new ReduceCallback<String, String, Integer>() {
+                    @Override
+    public synchronized void reduceDone(String k, Map<String, Integer> v) {
+            output.put(k, v);
+    }
+            };
+            
+            List<Future> reduceFutures = new ArrayList<Future>(groupedItems.size());
+            
+            Iterator<Map.Entry<String, List<String>>> groupedIter = groupedItems.entrySet().iterator();
+            while(groupedIter.hasNext()) {
+                    Map.Entry<String, List<String>> entry = groupedIter.next();
+                    final String word = entry.getKey();
+                    final List<String> list = entry.getValue();
+                    
+                    Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                    	reduce(word, list, reduceCallback);
+                    	}
+                    });
+                    reduceFutures.add(executor.submit(t));
+//                  reduceCluster.add(t);
+//                  t.start();
+            }
+            
+            // wait for reducing phase to be over:
+            for(Future current : reduceFutures) {
+            	try {
+            		// get method blocks until thread is finished
+            		current.get();
+            	} catch(InterruptedException | ExecutionException e) {
+            		e.printStackTrace();
+            	}
+            }
+            
+            long end = System.currentTimeMillis();
+            long time = end-start;
+            System.out.println("Approach 3 modified - uses thread pools");
+            System.out.println("Time taken: "+time/1000.00+" secs");
+            //System.out.println(output);
+            System.out.println();
         }
         in.close();
 	}
