@@ -47,7 +47,7 @@ public class MapReduce {
         // together with the number of occurrences of that word
         // without any sorting
 		
-		
+		// Scammer to read inputs
 		Scanner in = new Scanner(System.in);
 		
 		// Ask for the number of threads
@@ -194,14 +194,14 @@ public class MapReduce {
                         final String contents = entry.getValue();
                         
                         Thread t = new Thread(new Runnable() {
-                                @Override
-            public void run() {
-                                	map(file, contents, mapCallback);
-            }
+                        @Override
+                        public void run() {
+                        	map(file, contents, mapCallback);
+                        }
                         });
                         mapCluster.add(t);
                         t.start();
-                }
+                    }
                 
                 // wait for mapping phase to be over:
                 for(Thread t : mapCluster) {
@@ -375,7 +375,7 @@ public class MapReduce {
                 }
                 long end = System.currentTimeMillis();
                 long time = end-start;
-                System.out.println("Approach 4 Parallel Group phase");
+                System.out.println("Approach 3 modified - uses thread pools");
                 System.out.println("Time taken: "+time/1000.00+" secs");
                 //System.out.println(output);
         }
@@ -499,7 +499,7 @@ public class MapReduce {
             
             long end = System.currentTimeMillis();
             long time = end-start;
-            System.out.println("Approach 3 modified - uses thread pools");
+            System.out.println("Approach 4 Parallel Group phase");
             System.out.println("Time taken: "+time/1000.00+" secs");
             //System.out.println(output);
             System.out.println();
