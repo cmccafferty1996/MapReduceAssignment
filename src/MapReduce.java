@@ -281,7 +281,7 @@ public class MapReduce {
         }
 	        
 	        
-        // APPROACH #3: Modified Distributed MapReduce
+        // APPROACH #3: Modified Distributed MapReduce (Thread pool)
         {
                 final Map<String, Map<String, Integer>> output = new HashMap<String, Map<String, Integer>>();
                 
