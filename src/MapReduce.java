@@ -72,30 +72,42 @@ public class MapReduce {
         ////////////
         // INPUT:
         ///////////
+		Map<String, String> input = new HashMap<String, String>();
 		
-        File inFile = new File("/MapReduceAssignment/res/Oxford_English_Dictionary.txt");
-        String fileContents = null;
-		try {
-			fileContents = 
-					new String(Files.readAllBytes(Paths.get("C:/Users/cmcca/workspace/MapReduceAssignment/res/Oxford_English_Dictionary.txt")));
-		} catch (IOException e1) {
-			System.out.println("Error getting file contents");
-			e1.printStackTrace();
+		for (String file: args){
+			File inFile = new File(file);
+	        String fileContents = null;
+			try {
+				fileContents = 
+						new String(Files.readAllBytes(Paths.get(inFile.getAbsolutePath())));
+				input.put(file, fileContents);
+			} catch (IOException e1) {
+				System.out.println("Error getting file contents");
+				e1.printStackTrace();
+			}
 		}
-		
-		File inFile2 = new File("/MapReduceAssignment/res/Paradise_Lost.txt");
-        String fileContents2 = null;
-		try {
-			fileContents2 = 
-					new String(Files.readAllBytes(Paths.get("C:/Users/cmcca/git/MapReduceAssignment/res/Paradise_Lost.txt")));
-		} catch (IOException e1) {
-			System.out.println("Error getting file contents");
-			e1.printStackTrace();
-		}
-        
-        Map<String, String> input = new HashMap<String, String>();
-        input.put(inFile.getName(), fileContents);
-        input.put(inFile2.getName(), fileContents2);
+//        File inFile = new File("/MapReduceAssignment/res/Oxford_English_Dictionary.txt");
+//        String fileContents = null;
+//		try {
+//			fileContents = 
+//					new String(Files.readAllBytes(Paths.get("C:/Users/cmcca/workspace/MapReduceAssignment/res/Oxford_English_Dictionary.txt")));
+//		} catch (IOException e1) {
+//			System.out.println("Error getting file contents");
+//			e1.printStackTrace();
+//		}
+//		
+//		File inFile2 = new File("/MapReduceAssignment/res/Paradise_Lost.txt");
+//        String fileContents2 = null;
+//		try {
+//			fileContents2 = 
+//					new String(Files.readAllBytes(Paths.get("C:/Users/cmcca/git/MapReduceAssignment/res/Paradise_Lost.txt")));
+//		} catch (IOException e1) {
+//			System.out.println("Error getting file contents");
+//			e1.printStackTrace();
+//		}
+//        
+//        input.put(inFile.getName(), fileContents);
+//        input.put(inFile2.getName(), fileContents2);
         //input.put("file3.txt", "foo foo foo bird");
         
         // APPROACH #1: Brute force
