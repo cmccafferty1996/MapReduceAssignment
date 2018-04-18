@@ -81,10 +81,20 @@ public class MapReduce {
 			System.out.println("Error getting file contents");
 			e1.printStackTrace();
 		}
+		
+		File inFile2 = new File("/MapReduceAssignment/res/Paradise_Lost.txt");
+        String fileContents2 = null;
+		try {
+			fileContents2 = 
+					new String(Files.readAllBytes(Paths.get("C:/Users/cmcca/git/MapReduceAssignment/res/Paradise_Lost.txt")));
+		} catch (IOException e1) {
+			System.out.println("Error getting file contents");
+			e1.printStackTrace();
+		}
         
         Map<String, String> input = new HashMap<String, String>();
         input.put(inFile.getName(), fileContents);
-        //input.put("file2.txt", "foo house cat cat dog");
+        input.put(inFile2.getName(), fileContents2);
         //input.put("file3.txt", "foo foo foo bird");
         
         // APPROACH #1: Brute force
