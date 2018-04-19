@@ -19,8 +19,6 @@ public class MapReduce {
 	
 	private static String threads = "";
 	private static int numThreads = -1;
-	//private static String files = "";
-	//private static int numFiles = -1;
 	
 	public static void main(String[] args) throws ExecutionException {
 		// the problem:
@@ -435,7 +433,6 @@ public class MapReduce {
             }
             
             // GROUP:
-            
             Map<String, List<String>> groupedItems = new HashMap<String, List<String>>();
             List<Future> groupFutures = new ArrayList<Future>(); 
             
