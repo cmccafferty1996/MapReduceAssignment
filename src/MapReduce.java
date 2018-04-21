@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-//Test comment
 public class MapReduce {
 	
 	private static String threads = "";
@@ -46,7 +45,7 @@ public class MapReduce {
         // together with the number of occurrences of that word
         // without any sorting
 		
-		// Scammer to read inputs
+		// Scanner to read inputs
 		Scanner in = new Scanner(System.in);
 		
 		// Ask for the number of threads
@@ -253,10 +252,10 @@ public class MapReduce {
                         final List<String> list = entry.getValue();
                         
                         Thread t = new Thread(new Runnable() {
-                                @Override
-            public void run() {
-                                        reduce(word, list, reduceCallback);
-                                }
+                        	@Override
+                            public void run() {
+                        		reduce(word, list, reduceCallback);
+                        	}
                         });
                         reduceCluster.add(t);
                         t.start();
@@ -499,10 +498,7 @@ public class MapReduce {
             		// get method blocks until thread is finished
             		current.get();
             	} catch(InterruptedException | ExecutionException e) {
-            		e.printStackTrace();
-            	} catch (NullPointerException npe){
-            		// catch but don't do anything
-            		// program continues to run fine
+            		//e.printStackTrace();
             	}
             }
             
